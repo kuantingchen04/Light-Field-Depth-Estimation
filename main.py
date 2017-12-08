@@ -36,6 +36,8 @@ parser.add_argument('--L1_lambda', dest='L1_lambda', type=float, default=100.0, 
 
 args = parser.parse_args()
 
+# python tools/dockrun.py python main.py --phase train
+
 def main(_):
     if not os.path.exists(args.checkpoint_dir):
         os.makedirs(args.checkpoint_dir)

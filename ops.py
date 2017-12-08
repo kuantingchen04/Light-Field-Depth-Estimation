@@ -79,9 +79,8 @@ def deconv2d(input_, output_shape,
         else:
             return deconv
        
-
 def lrelu(x, leak=0.2, name="lrelu"):
-  return tf.maximum(x, leak*x)
+    return tf.maximum(x, leak*x)
 
 def linear(input_, output_size, scope=None, stddev=0.02, bias_start=0.0, with_w=False):
     shape = input_.get_shape().as_list()
@@ -95,3 +94,11 @@ def linear(input_, output_size, scope=None, stddev=0.02, bias_start=0.0, with_w=
             return tf.matmul(input_, matrix) + bias, matrix, bias
         else:
             return tf.matmul(input_, matrix) + bias
+        
+def lstm(input_, n_hidden, keep_prob, n_dim, name="lstm"):
+    # input (1,5,512), output (1,5,n_hidden) 
+    with tf.variable_scope(name):
+        lstm_cell = tf.contrib.rnn.MultiRNNCell([tf.contrib.rnn.DropoutWrapper(tf.contrib.rnn.BasicLSTMCell(n_hidden), output_keep_prob=keep_prob)for _ in range(n_dim)]);
+        
+        outputs,states = tf.nn.dynamic_rnn(lstm_cell,input_,dtype=tf.float32)
+        return outputs[:,-1,:]

@@ -9,6 +9,7 @@ import pprint
 import scipy.misc
 import numpy as np
 from time import gmtime, strftime
+import os
 
 pp = pprint.PrettyPrinter()
 
@@ -28,6 +29,18 @@ def load_data(image_path, flip=True, is_test=False):
     # img_AB shape: (fine_size, fine_size, input_c_dim + output_c_dim)
     return img_AB
 
+def load_data2(image_path, idx):
+    img_A, img_B = load_image2(image_path,idx)
+    rgb_scale   = 175.5
+    depth_scale = 32767.5
+    img_A = img_A/depth_scale - 1.
+    img_B = img_B/rgb_scale - 1.
+
+    img_AB = np.concatenate((img_A, img_B), axis=2)
+    # img_AB shape: (fine_size, fine_size, input_c_dim + output_c_dim)
+    #print('img_AB shape: {}'.format(img_AB.shape))
+    return img_AB
+
 def load_image(image_path):
     input_img = imread(image_path)
     w = int(input_img.shape[1])
@@ -36,6 +49,27 @@ def load_image(image_path):
     img_B = input_img[:, w2:w]
 
     return img_A, img_B
+
+def load_image2(image_path,idx,isLSTM=True):
+    # assume image_path = "./train/A", and have to read from 'A' and 'B'
+    # A is depth, B is rgb
+    A_path = os.path.join(image_path[:-1],'A',idx)
+    B_path = os.path.join(image_path[:-1],'B',idx)
+    if isLSTM:
+        # input dimension: (5,256,256,3)
+        # output dimension: (256,256,15)
+        img_B_original = np.load(B_path)
+        img_B = img_B_original[0]
+        for i in range(1,img_B_original.shape[0]):
+            img_B = np.concatenate((img_B,img_B_original[i]),axis=2)
+    else:
+        img_B = np.load(B_path)[0]
+        
+    img_A = np.load(A_path)
+    img_A = img_A.reshape(img_A.shape[0],img_A.shape[1],1)
+    
+    return img_A, img_B
+    
 
 def preprocess_A_and_B(img_A, img_B, load_size=286, fine_size=256, flip=True, is_test=False):
     if is_test:
@@ -95,6 +129,6 @@ def transform(image, npx=64, is_crop=True, resize_w=64):
     return np.array(cropped_image)/127.5 - 1.
 
 def inverse_transform(images):
-    return (images+1.)/2.
+    return (images+1.)/2.*255
 
 

@@ -5,3 +5,5 @@ datasets/*
 checkpoint/*
 val/*
 *.pyc
+.idea/
+
