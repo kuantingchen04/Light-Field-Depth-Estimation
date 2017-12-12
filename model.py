@@ -80,7 +80,7 @@ class pix2pix(object):
         #self.real_A = self.real_data[:, :, :, self.input_c_dim:self.input_c_dim + self.output_c_dim]
         self.real_B = self.real_data[:, :, :, :self.output_c_dim]
         self.real_A = self.real_data[:, :, :, self.output_c_dim:self.input_c_dim + self.output_c_dim]
-        #print(self.real_A)
+        mask = tf.cast(self.real_B>-1,tf.int32) # find all valid pixels
         #print(self.real_B)
         self.fake_B = self.generator(self.real_A)
         print(self.fake_B)
@@ -90,17 +90,17 @@ class pix2pix(object):
         print(self.fake_AB)
         self.D, self.D_logits = self.discriminator(self.real_AB, reuse=False)
         self.D_, self.D_logits_ = self.discriminator(self.fake_AB, reuse=True)
-
+        bad_diff, good_diff = tf.dynamic_partition(self.real_B - self.fake_B,mask,2)
         self.fake_B_sample = self.sampler(self.real_A)
-
+        
         self.d_sum = tf.summary.histogram("d", self.D)
         self.d__sum = tf.summary.histogram("d_", self.D_)
         self.fake_B_sum = tf.summary.image("fake_B", self.fake_B)
 
-        self.d_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.D_logits, labels=tf.ones_like(self.D)))
+        self.d_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.D_logits, labels=tf.scalar_mul(0.9,tf.ones_like(self.D))))
         self.d_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.D_logits_, labels=tf.zeros_like(self.D_)))
         self.g_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.D_logits_, labels=tf.ones_like(self.D_))) \
-                        + self.L1_lambda * tf.reduce_mean(tf.abs(self.real_B - self.fake_B))
+                        + self.L1_lambda * tf.reduce_mean(tf.abs(good_diff))
 
         self.d_loss_real_sum = tf.summary.scalar("d_loss_real", self.d_loss_real)
         self.d_loss_fake_sum = tf.summary.scalar("d_loss_fake", self.d_loss_fake)
