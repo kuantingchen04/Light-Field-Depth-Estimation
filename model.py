@@ -287,7 +287,8 @@ class pix2pix(object):
                 lstm_input_final = tf.concat((lstm_input_final,tf.reshape(lstm_input[i],[1,1,512])),axis =1)
             print('lstm_input_final after: {}'.format(lstm_input_final.shape))
 
-            output = lstm(lstm_input_final,self.n_hidden_lstm,self.keep_prob_lstm, self.num_layer_lstm)
+            output = lstm(lstm_input_final,self.n_hidden_lstm,self.keep_prob_lstm, self.num_layer_lstm, name='g_lstm')
+            print('creating cell LSTM in gen')
             
             output = tf.reshape(output,[-1,1,1,512])
             print('output after lstm: {}'.format(output))
@@ -398,7 +399,8 @@ class pix2pix(object):
                 lstm_input_final = tf.concat((lstm_input_final,tf.reshape(lstm_input[i],[1,1,512])),axis =1)
             #print('lstm_input_final after: {}'.format(lstm_input_final.shape))
 
-            output = lstm(lstm_input_final,self.n_hidden_lstm,self.keep_prob_lstm, self.num_layer_lstm)
+            output = lstm(lstm_input_final,self.n_hidden_lstm,self.keep_prob_lstm, self.num_layer_lstm, name='g_lstm')
+            print('creating cell LSTM in sampler')
             
             output = tf.reshape(output,[-1,1,1,512])
             #print('output after lstm: {}'.format(output))
