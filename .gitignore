@@ -4,6 +4,8 @@ test/*
 datasets/*
 checkpoint/*
 val/*
+results/
+depth_images_v2_400_gt/
+
 *.pyc
 .idea/
-

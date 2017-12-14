@@ -118,7 +118,8 @@ def merge(images, size):
     return img
 
 def imsave(images, size, path):
-    return scipy.misc.imsave(path, merge(images, size))
+    return scipy.misc.imsave(path, merge(images, size)) # Warning: will rescale to [0,255]
+    # return scipy.misc.toimage(merge(images, size),cmin=0,cmax=255).save(path) # no rescale but hard to see
 
 def transform(image, npx=64, is_crop=True, resize_w=64):
     # npx : # of pixels width/height of image
