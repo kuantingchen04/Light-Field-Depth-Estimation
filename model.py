@@ -633,6 +633,7 @@ class pix2pix(object):
         ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
         if ckpt and ckpt.model_checkpoint_path:
             ckpt_name = os.path.basename(ckpt.model_checkpoint_path)
+            # ckpt_name = "pix2pix.model-59502"
             self.saver.restore(self.sess, os.path.join(checkpoint_dir, ckpt_name))
             return True
         else:
@@ -685,6 +686,6 @@ class pix2pix(object):
                 self.fake_B_sample,
                 feed_dict={self.real_data: sample_image.reshape(1,sample_image.shape[0],sample_image.shape[1],sample_image.shape[2])}
             )
-            np.save('./{}/test_{}.npy'.format(npy_dir, sample_files[i].rstrip('.npy')),samples)
+            np.save('./{}/test_{}.npy'.format(npy_dir, sample_files[i].rstrip('.npy')),(samples.squeeze()+1)*32767.5) # Save as metric scale
             save_images(samples, [self.batch_size, 1],
                         './{}/test_{}.png'.format(args.test_dir, sample_files[i].rstrip('.npy')))

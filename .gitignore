@@ -9,3 +9,5 @@ depth_images_v2_400_gt/
 
 *.pyc
 .idea/
+.ipynb_checkpoints/
+*.ipynb

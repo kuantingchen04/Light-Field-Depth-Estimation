@@ -31,7 +31,7 @@ def load_data(image_path, flip=True, is_test=False):
 
 def load_data2(image_path, idx):
     img_A, img_B = load_image2(image_path,idx)
-    rgb_scale   = 175.5
+    rgb_scale   = 127.5
     depth_scale = 32767.5
     img_A = img_A/depth_scale - 1.
     img_B = img_B/rgb_scale - 1.
