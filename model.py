@@ -42,7 +42,7 @@ class pix2pix(object):
         self.L1_lambda = L1_lambda
         
         # lstm variables
-        self.n_hidden_lstm  = 2048
+        self.n_hidden_lstm  = 1024
         self.num_layer_lstm = 2
         self.keep_prob_lstm = 0.5
 
@@ -115,7 +115,7 @@ class pix2pix(object):
         self.d_vars = [var for var in t_vars if 'd_' in var.name]
         self.g_vars = [var for var in t_vars if 'g_' in var.name]
 
-        self.saver = tf.train.Saver()
+        self.saver = tf.train.Saver(max_to_keep=10)
 
 
     def load_random_samples(self):
@@ -206,7 +206,7 @@ class pix2pix(object):
                 if np.mod(counter, 100) == 1:
                     self.sample_model(args.sample_dir, epoch, idx)
 
-                if np.mod(counter, 500) == 2:
+                if np.mod(counter, 5000) == 2:
                     self.save(args.checkpoint_dir, counter)
 
     def discriminator(self, image, y=None, reuse=False):
@@ -287,13 +287,14 @@ class pix2pix(object):
                 lstm_input_final = tf.concat((lstm_input_final,tf.reshape(lstm_input[i],[1,1,512])),axis =1)
             print('lstm_input_final after: {}'.format(lstm_input_final.shape))
 
-            output = lstm(lstm_input_final,self.n_hidden_lstm,self.keep_prob_lstm, self.num_layer_lstm, name='g_lstm')
-            print('creating cell LSTM in gen')
+            output_lstm = lstm(lstm_input_final,self.n_hidden_lstm,self.keep_prob_lstm, self.num_layer_lstm, name='g_lstm')
+            output = output_lstm[:, 0,:] + output_lstm[:, 1, :] + output_lstm[:, 2, :] + output_lstm[:, 3, :] + output_lstm[:, 4, :]
+            print('lstm_output sum up: {}'.format(output.shape))
 
             w_output = tf.Variable(tf.truncated_normal([self.n_hidden_lstm,self.gf_dim*8]),name="g_w")
             b_output = tf.Variable(tf.zeros(self.gf_dim*8),name="g_b")
             output = tf.matmul(output,w_output) + b_output
-            print('output after lstm matmul: {}'.format(output))
+            print('output after matmul: {}'.format(output))
             
             output = tf.reshape(output,[-1,1,1,512])
             print('output after reshape: {}'.format(output))
@@ -404,7 +405,9 @@ class pix2pix(object):
                 lstm_input_final = tf.concat((lstm_input_final,tf.reshape(lstm_input[i],[1,1,512])),axis =1)
             #print('lstm_input_final after: {}'.format(lstm_input_final.shape))
 
-            output = lstm(lstm_input_final,self.n_hidden_lstm,self.keep_prob_lstm, self.num_layer_lstm, name='g_lstm')
+            output_lstm = lstm(lstm_input_final,self.n_hidden_lstm,self.keep_prob_lstm, self.num_layer_lstm, name='g_lstm')
+            output = output_lstm[:, 0,:] + output_lstm[:, 1, :] + output_lstm[:, 2, :] + output_lstm[:, 3, :] + output_lstm[:, 4, :]
+            print('lstm_output sum up: {}'.format(output.shape))
             print('creating cell LSTM in sampler')
 
             w_output = tf.Variable(tf.truncated_normal([self.n_hidden_lstm, self.gf_dim * 8]), name="g_w")
@@ -633,7 +636,7 @@ class pix2pix(object):
         ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
         if ckpt and ckpt.model_checkpoint_path:
             ckpt_name = os.path.basename(ckpt.model_checkpoint_path)
-            # ckpt_name = "pix2pix.model-59502"
+            ckpt_name = "pix2pix.model-35002"
             self.saver.restore(self.sess, os.path.join(checkpoint_dir, ckpt_name))
             return True
         else:
@@ -649,7 +652,7 @@ class pix2pix(object):
         sample_files = [name for name in os.listdir(savePath)]
         # sort testing input
         #n = [int(i) for i in map(lambda x: x.split('/')[-1].split('.jpg')[0], sample_files)]
-        n = [int(i.lstrip('0')) for i in map(lambda x: x.split('.npy')[0],sample_files)]
+        n = [int(i.lstrip('0')) if i.lstrip('0') else 0 for i in map(lambda x: x.split('.npy')[0],sample_files)]
         #print(n[0].lstrip('0'))
         sample_files = [x for (y, x) in sorted(zip(n, sample_files))]
         print(sample_files)

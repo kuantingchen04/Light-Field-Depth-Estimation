@@ -25,13 +25,16 @@ def compute_errors(gt, pred):
 min_depth = 1e-3
 max_depth = 80
 # Get GT
-gt_npy_dir = 'datasets/scene12_v2_400/val/A'  ## Correct GT
+#gt_npy_dir = 'datasets/scene12_v2_400/val/A'  ## Correct GT
+gt_npy_dir = 'datasets/scene12_v3_400/val/A'  ## Correct GT
+
 test_npy_dir = 'test/npy'
 data_npy = [os.path.join(gt_npy_dir, name) for name in os.listdir(gt_npy_dir)];
 data_npy.sort()
 test_npy = [os.path.join(test_npy_dir, name) for name in os.listdir(test_npy_dir)];
 test_npy.sort()
-num_samples = len(gt_npy_dir)
+num_samples = len(data_npy)
+print num_samples
 
 rms = np.zeros(num_samples, np.float32)
 log_rms = np.zeros(num_samples, np.float32)
