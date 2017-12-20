@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import sys
 
 # revise from
 # https://github.com/mrharicot/monodepth/blob/master/utils/evaluate_kitti.py
@@ -35,6 +36,9 @@ test_npy = [os.path.join(test_npy_dir, name) for name in os.listdir(test_npy_dir
 test_npy.sort()
 num_samples = len(data_npy)
 print num_samples
+if (len(data_npy)!=len(test_npy)):
+    sys.exit("Check files")
+
 
 rms = np.zeros(num_samples, np.float32)
 log_rms = np.zeros(num_samples, np.float32)

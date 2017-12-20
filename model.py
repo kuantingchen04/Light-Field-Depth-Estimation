@@ -42,7 +42,7 @@ class pix2pix(object):
         self.L1_lambda = L1_lambda
         
         # lstm variables
-        self.n_hidden_lstm  = 1024
+        self.n_hidden_lstm  = 512
         self.num_layer_lstm = 2
         self.keep_prob_lstm = 0.5
 
@@ -287,8 +287,8 @@ class pix2pix(object):
                 lstm_input_final = tf.concat((lstm_input_final,tf.reshape(lstm_input[i],[1,1,512])),axis =1)
             print('lstm_input_final after: {}'.format(lstm_input_final.shape))
 
-            output_lstm = lstm(lstm_input_final,self.n_hidden_lstm,self.keep_prob_lstm, self.num_layer_lstm, name='g_lstm')
-            output = output_lstm[:, 0,:] + output_lstm[:, 1, :] + output_lstm[:, 2, :] + output_lstm[:, 3, :] + output_lstm[:, 4, :]
+            output = lstm(lstm_input_final,self.n_hidden_lstm,self.keep_prob_lstm, self.num_layer_lstm, name='g_lstm')
+            #output = output_lstm[:, 0,:] + output_lstm[:, 1, :] + output_lstm[:, 2, :] + output_lstm[:, 3, :] + output_lstm[:, 4, :]
             print('lstm_output sum up: {}'.format(output.shape))
 
             w_output = tf.Variable(tf.truncated_normal([self.n_hidden_lstm,self.gf_dim*8]),name="g_w")
@@ -405,8 +405,8 @@ class pix2pix(object):
                 lstm_input_final = tf.concat((lstm_input_final,tf.reshape(lstm_input[i],[1,1,512])),axis =1)
             #print('lstm_input_final after: {}'.format(lstm_input_final.shape))
 
-            output_lstm = lstm(lstm_input_final,self.n_hidden_lstm,self.keep_prob_lstm, self.num_layer_lstm, name='g_lstm')
-            output = output_lstm[:, 0,:] + output_lstm[:, 1, :] + output_lstm[:, 2, :] + output_lstm[:, 3, :] + output_lstm[:, 4, :]
+            output = lstm(lstm_input_final,self.n_hidden_lstm,self.keep_prob_lstm, self.num_layer_lstm, name='g_lstm')
+            #output = output_lstm[:, 0,:] + output_lstm[:, 1, :] + output_lstm[:, 2, :] + output_lstm[:, 3, :] + output_lstm[:, 4, :]
             print('lstm_output sum up: {}'.format(output.shape))
             print('creating cell LSTM in sampler')
 
