@@ -1,5 +1,5 @@
 ### Light-Field-Depth-Estimation
-#### *Light Filed Depth Estimation using GAN*
+#### *Light Filed Depth Estimation using cGAN*
 
 #### Data
 * 600 Light Field Images from [DDFF 12-scene](http://hazirbas.com/datasets/ddff12scene/)
