@@ -102,5 +102,5 @@ def lstm(input_, n_hidden, keep_prob, n_dim, name="lstm"):
         
         outputs,states = tf.nn.dynamic_rnn(lstm_cell,input_,dtype=tf.float32)
         print('lstm_output shape: {}'.format(outputs.shape))
-        return outputs[:,-1,:]
-        #return outputs
+        #return outputs[:,-1,:]
+        return outputs

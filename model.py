@@ -5,9 +5,12 @@ from glob import glob
 import tensorflow as tf
 import numpy as np
 from six.moves import xrange
+import shutil
 
 from ops import *
 from utils import *
+
+os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 
 class pix2pix(object):
     def __init__(self, sess, image_size=256,
@@ -42,7 +45,7 @@ class pix2pix(object):
         self.L1_lambda = L1_lambda
         
         # lstm variables
-        self.n_hidden_lstm  = 512
+        self.n_hidden_lstm  = 1024
         self.num_layer_lstm = 2
         self.keep_prob_lstm = 0.5
 
@@ -287,8 +290,8 @@ class pix2pix(object):
                 lstm_input_final = tf.concat((lstm_input_final,tf.reshape(lstm_input[i],[1,1,512])),axis =1)
             print('lstm_input_final after: {}'.format(lstm_input_final.shape))
 
-            output = lstm(lstm_input_final,self.n_hidden_lstm,self.keep_prob_lstm, self.num_layer_lstm, name='g_lstm')
-            #output = output_lstm[:, 0,:] + output_lstm[:, 1, :] + output_lstm[:, 2, :] + output_lstm[:, 3, :] + output_lstm[:, 4, :]
+            output_lstm = lstm(lstm_input_final,self.n_hidden_lstm,self.keep_prob_lstm, self.num_layer_lstm, name='g_lstm')
+            output = output_lstm[:, 0,:] + output_lstm[:, 1, :] + output_lstm[:, 2, :] + output_lstm[:, 3, :] + output_lstm[:, 4, :]
             print('lstm_output sum up: {}'.format(output.shape))
 
             w_output = tf.Variable(tf.truncated_normal([self.n_hidden_lstm,self.gf_dim*8]),name="g_w")
@@ -405,8 +408,8 @@ class pix2pix(object):
                 lstm_input_final = tf.concat((lstm_input_final,tf.reshape(lstm_input[i],[1,1,512])),axis =1)
             #print('lstm_input_final after: {}'.format(lstm_input_final.shape))
 
-            output = lstm(lstm_input_final,self.n_hidden_lstm,self.keep_prob_lstm, self.num_layer_lstm, name='g_lstm')
-            #output = output_lstm[:, 0,:] + output_lstm[:, 1, :] + output_lstm[:, 2, :] + output_lstm[:, 3, :] + output_lstm[:, 4, :]
+            output_lstm = lstm(lstm_input_final,self.n_hidden_lstm,self.keep_prob_lstm, self.num_layer_lstm, name='g_lstm')
+            output = output_lstm[:, 0,:] + output_lstm[:, 1, :] + output_lstm[:, 2, :] + output_lstm[:, 3, :] + output_lstm[:, 4, :]
             print('lstm_output sum up: {}'.format(output.shape))
             print('creating cell LSTM in sampler')
 
@@ -673,8 +676,12 @@ class pix2pix(object):
         print(sample_images.shape)
 
         npy_dir = os.path.join(args.test_dir,'npy')
-        if not os.path.exists(npy_dir):
-            os.makedirs(npy_dir)
+
+        if os.path.exists(args.test_dir):
+            shutil.rmtree(args.test_dir)
+        
+        os.makedirs(args.test_dir)
+        os.makedirs(npy_dir)
 
         start_time = time.time()
         if self.load(self.checkpoint_dir):
@@ -690,5 +697,6 @@ class pix2pix(object):
                 feed_dict={self.real_data: sample_image.reshape(1,sample_image.shape[0],sample_image.shape[1],sample_image.shape[2])}
             )
             np.save('./{}/test_{}.npy'.format(npy_dir, sample_files[i].rstrip('.npy')),(samples.squeeze()+1)*32767.5) # Save as metric scale
-            save_images(samples, [self.batch_size, 1],
-                        './{}/test_{}.png'.format(args.test_dir, sample_files[i].rstrip('.npy')))
+            save_images(samples, [self.batch_size, 1],'./{}/test_{}.png'.format(args.test_dir, sample_files[i].rstrip('.npy')))
+
+        print ("Test Runtime:{}",(time.time() - start_time)/len(sample_image))
